@@ -36,7 +36,10 @@ for uid in jq.queue:
             
         print '\nDownloading {0} from {1}'.format(uid, jq.queue[uid]['sub'])
         jp.reddit_get_submission(uid)
-        ji.download_wigglegram(jp.oc.url)
+        if (jq.queue[uid]['sub'] == 'wigglegrams'):
+            ji.download_wigglegram(jp.oc.url)
+        elif (jq.queue[uid]['sub'] == 'crossview'):
+            ji.download_crossview(jp.oc.url)
         print 'Processing images'
         ji.save_all(uid)
  
@@ -46,6 +49,7 @@ for uid in jq.queue:
             inputVar = raw_input("Add to skip list? (Y/N) ")
             if inputVar.upper() == 'Y':
                 jq.skip_queue(uid, jq.queue[uid]['sub'])
+                jq.save_queue()
         elif inputVar.upper() == 'Q':
             ji.remove_all(uid)
             break
@@ -99,7 +103,7 @@ for uid in jq.queue:
                     upload_r = jp.submit_reddit('Wigglegrams', jq.queue[uid]['wigglegramImgur'])
                     print 'reddit URL: {0}'.format(upload_r.short_link)
                     jq.queue[uid]['wigglegramReddit'] = upload_r.id
-                jp.comment_linking_to_oc(jq.queue[uid]['wigglegramwReddit'])
+                jp.comment_linking_to_oc(jq.queue[uid]['wigglegramReddit'])
                 jq.queue[uid]['wigglegram'] = 0
                 jq.save_queue()
                     
