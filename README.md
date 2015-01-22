@@ -1,4 +1,4 @@
-pyJitterBot.py
+jitterbot.py
 ==========================
 
 This is the script used to run [/u/JitterBot](https://www.reddit.com/user/JitterBot/) on reddit.com.  It automatically converts crossview stereograms to anaglyph and wigglegram images and wigglegrams to anaglyphs and crossviews.
@@ -24,4 +24,4 @@ Tested with Python 2.7.8 and the following libraries (tested versions in parenth
   * praw (2.1.19)
   * pyimgur (0.5.2)
 
-Note that a version of images2gif that works with the pyJitterBot.py code is also included because the PyPI version has unresolved issues. 
+Note that a version of images2gif that works with the jitterbot.py code is also included because the PyPI version has unresolved issues. 
