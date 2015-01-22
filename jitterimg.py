@@ -27,7 +27,7 @@ class jitterimg(object):
     def download_crossview(self, url):
         f = cStringIO.StringIO(urllib2.urlopen(url).read())
         img_type = imghdr.what(f)
-        if (img_type == 'gif') or (img_type == 'png') or (img_type == 'jpg'):
+        if (img_type == 'gif') or (img_type == 'png') or (img_type == 'jpeg'):
             img = Image.open(f).convert('RGB')
             w, h = img.size
             w = int(math.floor(w/2)*2)

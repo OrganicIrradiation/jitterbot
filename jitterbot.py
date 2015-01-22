@@ -2,6 +2,7 @@ from ConfigParser import SafeConfigParser
 import jitterimg
 import jitterpost
 import jitterqueue
+import matplotlib.pyplot as plt
 
 # Get the user information from the configuration file
 config = SafeConfigParser()
@@ -44,6 +45,14 @@ for uid in jq.queue:
         ji.save_all(uid)
  
         print 'Original: {0}\nLong: {1}\nShort: {2}'.format(jp.oc.title, jp.title, jp.title_short)
+        print 'Version A (crossview):'
+        plt.imshow(ji.crossview())
+        plt.show()
+        print 'Version B (parallelview):'
+        plt.imshow(ji.swap_lr().crossview())
+        plt.show()
+        ji.swap_lr()
+        
         inputVar = raw_input("Submit? (Y/N/Q) ")
         if inputVar.upper() == 'N':
             inputVar = raw_input("Add to skip list? (Y/N) ")
@@ -54,7 +63,7 @@ for uid in jq.queue:
             ji.remove_all(uid)
             break
         elif inputVar.upper() == 'Y':
-            inputVar = raw_input("Swap left/right images (make sure A is crossview!)? (Y/N) ")
+            inputVar = raw_input("Swap left/right images (make sure Version A is crossview!)? (Y/N) ")
             if inputVar.upper() == 'Y':
                 ji.swap_lr()
                 print 'Re-processing images'
@@ -64,7 +73,7 @@ for uid in jq.queue:
                 if not 'anaglyphImgur' in jq.queue[uid]:
                     print 'Submitting anaglyphs to Imgur'
                     upload_i = jp.submit_imgur_2(uid+"_anaglyphA.JPG",
-                                                    uid+"_anaglyphB.JPG")
+                                                 uid+"_anaglyphB.JPG")
                     print 'imgur URL: {0}'.format(upload_i.link)
                     jq.queue[uid]['anaglyphImgur'] = upload_i.link
                 if not 'anaglyphReddit' in jq.queue[uid]:
@@ -80,7 +89,7 @@ for uid in jq.queue:
                 if not 'crossviewImgur' in jq.queue[uid]:
                     print 'Submitting crossviews to Imgur'
                     upload_i = jp.submit_imgur_2(uid+"_crossviewA.JPG",
-                                                    uid+"_crossviewB.JPG")
+                                                 uid+"_crossviewB.JPG")
                     print 'imgur URL: {0}'.format(upload_i.link)
                     jq.queue[uid]['crossviewImgur'] = upload_i.link
                 if not 'crossviewReddit' in jq.queue[uid]:
