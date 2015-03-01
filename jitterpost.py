@@ -5,8 +5,8 @@ class jitterpost(object):
     def __init__(self):
         #Initialize the class with some basic attributes.
         self.oc = ''
-        self.title = ''
-        self.title_short = ''
+        self.title = u''
+        self.title_short = u''
         
     def login_imgur(self, client_id, client_secret):
         self.i = pyimgur.Imgur(client_id, client_secret=client_secret)
@@ -19,8 +19,8 @@ class jitterpost(object):
 
     def reddit_get_submission(self, submission_id):
         self.oc = self.r.get_submission(submission_id=submission_id)
-        self.title = self.oc.title + " (from /r/"+self.oc.subreddit.display_name+ " by /u/" + self.oc.author.name + ")"
-        self.title_short = self.oc.title + " (/u/" + self.oc.author.name + ")"
+        self.title = self.oc.title + ' (from /r/'+self.oc.subreddit.display_name+ ' by /u/' + self.oc.author.name + ')'
+        self.title_short = self.oc.title + ' (/u/' + self.oc.author.name + ')'
         self.title = self.remove_oc(self.title)
         self.title_short = self.remove_oc(self.title_short)
         return self
@@ -59,33 +59,33 @@ class jitterpost(object):
         self.oc.upvote()
         
     def remove_oc(self, txt):
-        outText = txt.replace('[OC]','')
-        outText = outText.replace('[oc]','')
-        outText = outText.replace('(OC)','')
-        outText = outText.replace('(oc)','')
-        outText = outText.replace('{OC}','')
-        outText = outText.replace('{oc}','')
-        outText = outText.replace('OC','')
-        outText = outText.replace('oc','')
+        outText = txt.replace(u'[OC]', u'')
+        outText = outText.replace(u'[oc]', u'')
+        outText = outText.replace(u'(OC)', u'')
+        outText = outText.replace(u'(oc)', u'')
+        outText = outText.replace(u'{OC}', u'')
+        outText = outText.replace(u'{oc}', u'')
+        outText = outText.replace(u'OC', u'')
+        outText = outText.replace(u'oc', u'')
         return outText
 
     def escape_reddit(self, txt):
-        outText = txt.replace("*","\*")
-        outText = outText.replace(">",r"\>")
-        outText = outText.replace("- ",r"\- ")
-        outText = outText.replace("\n1. ","\n1\. ")
-        outText = outText.replace("\n2. ","\n2\. ")
-        outText = outText.replace("\n3. ","\n3\. ")
-        outText = outText.replace("\n4. ","\n4\. ")
-        outText = outText.replace("\n5. ","\n5\. ")
-        outText = outText.replace("\n6. ","\n6\. ")
-        outText = outText.replace("\n7. ","\n7\. ")
-        outText = outText.replace("\n8. ","\n8\. ")
-        outText = outText.replace("\n9. ","\n9\. ")
-        outText = outText.replace("^","\^")
-        outText = outText.replace("[","\[")
-        outText = outText.replace("]","\]")
-        outText = outText.replace("(","\(")
-        outText = outText.replace(")","\)")
-        outText = outText.replace("#","\#")
+        outText = txt.replace(u'*', u'\*')
+        outText = outText.replace(u'>', u'\>')
+        outText = outText.replace(u'- ', u'\- ')
+        outText = outText.replace(u'\n1. ', u'\n1\. ')
+        outText = outText.replace(u'\n2. ', u'\n2\. ')
+        outText = outText.replace(u'\n3. ', u'\n3\. ')
+        outText = outText.replace(u'\n4. ', u'\n4\. ')
+        outText = outText.replace(u'\n5. ', u'\n5\. ')
+        outText = outText.replace(u'\n6. ', u'\n6\. ')
+        outText = outText.replace(u'\n7. ', u'\n7\. ')
+        outText = outText.replace(u'\n8. ', u'\n8\. ')
+        outText = outText.replace(u'\n9. ', u'\n9\. ')
+        outText = outText.replace(u'^', u'\^')
+        outText = outText.replace(u'[', u'\[')
+        outText = outText.replace(u']', u'\]')
+        outText = outText.replace(u'(', u'\(')
+        outText = outText.replace(u')', u'\)')
+        outText = outText.replace(u'#', u'\#')
         return outText
