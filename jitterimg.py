@@ -1,4 +1,5 @@
 import cStringIO
+from exceptions import Exception
 from images2gif import writeGif
 import imghdr
 import math
@@ -23,6 +24,10 @@ class jitterimg(object):
         #Initialize the class with some basic attributes.
         self.imgA = '';
         self.imgB = '';
+
+    class FiletypeUnknown(Exception):
+        """Returns the image type of the file."""
+        pass
         
     def download_crossview(self, url):
         f = cStringIO.StringIO(urllib2.urlopen(url).read())
@@ -31,9 +36,11 @@ class jitterimg(object):
             img = Image.open(f).convert('RGB')
             w, h = img.size
             w = int(math.floor(w/2)*2)
-        self.imgA = img.crop((0, 0, w/2, h))
-        self.imgB = img.crop((w/2, 0, w, h))
-        return self
+            self.imgA = img.crop((0, 0, w/2, h))
+            self.imgB = img.crop((w/2, 0, w, h))
+            return self
+        else:
+            raise jitterimg.FiletypeUnknown(img_type)
 
     def download_wigglegram(self, url):
         f = cStringIO.StringIO(urllib2.urlopen(url).read())
@@ -41,9 +48,11 @@ class jitterimg(object):
         if img_type == 'gif':
             img = Image.open(f)
             frames = [frame.copy().convert('RGB') for frame in ImageSequence.Iterator(img)]
-        self.imgA = frames[0]
-        self.imgB = frames[len(frames)//2]
-        return self
+            self.imgA = frames[0]
+            self.imgB = frames[len(frames)//2]
+            return self
+        else:
+            raise jitterimg.FiletypeUnknown(img_type)
         
     def anaglyph(self):
         left = self.imgA.copy()

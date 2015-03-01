@@ -19,8 +19,12 @@ class jitterpost(object):
 
     def reddit_get_submission(self, submission_id):
         self.oc = self.r.get_submission(submission_id=submission_id)
-        self.title = self.oc.title + ' (from /r/'+self.oc.subreddit.display_name+ ' by /u/' + self.oc.author.name + ')'
-        self.title_short = self.oc.title + ' (/u/' + self.oc.author.name + ')'
+        if hasattr(self.oc.author, 'name'):
+            self.title = self.oc.title + ' (from /r/'+self.oc.subreddit.display_name+ ' by /u/' + self.oc.author.name + ')'
+            self.title_short = self.oc.title + ' (/u/' + self.oc.author.name + ')'
+        else:
+            self.title = self.oc.title + ' (from /r/'+self.oc.subreddit.display_name + ')'
+            self.title_short = self.oc.title
         self.title = self.remove_oc(self.title)
         self.title_short = self.remove_oc(self.title_short)
         return self

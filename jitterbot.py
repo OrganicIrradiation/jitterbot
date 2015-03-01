@@ -57,6 +57,11 @@ for uid in jq.queue:
                 continue
             else:
                 raise
+        except ji.FiletypeUnknown, filetype:
+            print 'ERROR: Filetype unknown or incompatible: {0}'.format(filetype)
+            jq.skip_queue(uid, jq.queue[uid]['sub'])
+            jq.save_queue()
+            continue
         ji.save_all(uid)
  
         print u'Original: {0}\nLong: {1}\nShort: {2}'.format(jp.oc.title, jp.title, jp.title_short)
