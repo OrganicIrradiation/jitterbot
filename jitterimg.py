@@ -12,11 +12,16 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # https://github.com/miguelgrinberg/anaglyph.py/blob/master/anaglyph.py
 jitterbot_anaglyph_matrices = {
-    'true': [ [ 0.299, 0.587, 0.114, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 0, 0, 0.299, 0.587, 0.114 ] ],
-    'mono': [ [ 0.299, 0.587, 0.114, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0.299, 0.587, 0.114, 0.299, 0.587, 0.114 ] ],
-    'color': [ [ 1, 0, 0, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 1, 0, 0, 0, 1 ] ],
-    'halfcolor': [ [ 0.299, 0.587, 0.114, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 1, 0, 0, 0, 1 ] ],
-    'optimized': [ [ 0, 0.7, 0.3, 0, 0, 0, 0, 0, 0 ], [ 0, 0, 0, 0, 1, 0, 0, 0, 1 ] ],
+    'true': [ [ 0.299, 0.587, 0.114, 0, 0, 0, 0, 0, 0 ],
+              [ 0, 0, 0, 0, 0, 0, 0.299, 0.587, 0.114 ] ],
+    'mono': [ [ 0.299, 0.587, 0.114, 0, 0, 0, 0, 0, 0 ],
+              [ 0, 0, 0, 0.299, 0.587, 0.114, 0.299, 0.587, 0.114 ] ],
+    'color': [ [ 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+               [ 0, 0, 0, 0, 1, 0, 0, 0, 1 ] ],
+    'halfcolor': [ [ 0.299, 0.587, 0.114, 0, 0, 0, 0, 0, 0 ],
+                   [ 0, 0, 0, 0, 1, 0, 0, 0, 1 ] ],
+    'optimized': [ [ 0, 0.7, 0.3, 0, 0, 0, 0, 0, 0 ],
+                   [ 0, 0, 0, 0, 1, 0, 0, 0, 1 ] ],
 }
 
 class jitterimg(object):
@@ -90,20 +95,17 @@ class jitterimg(object):
 
     def save_all(self, filename):
         self.remove_all(filename)
-        self.anaglyph().save(filename+"_anaglyphA.JPG")
-        self.swap_lr().anaglyph().save(filename+"_anaglyphB.JPG")
-        self.swap_lr().crossview().save(filename+"_crossviewA.JPG")
-        self.swap_lr().crossview().save(filename+"_crossviewB.JPG")
-        writeGif(filename+"_wiggle.GIF", self.swap_lr().wigglegram(), duration=0.1, dither=1)
+        self.anaglyph().save(filename+"_anaglyph.JPG")
+        self.crossview().save(filename+"_crossview.JPG")
+        self.swap_lr().crossview().save(filename+"_parallelview.JPG")
+        writeGif(filename+"_wigglegrams.GIF", self.swap_lr().wigglegram(), duration=0.1, dither=1)
 
     def remove_all(self, filename):
-        if os.path.isfile(filename+"_anaglyphA.JPG"):
-            os.remove(filename+"_anaglyphA.JPG")
-        if os.path.isfile(filename+"_anaglyphB.JPG"):
-            os.remove(filename+"_anaglyphB.JPG")
-        if os.path.isfile(filename+"_crossviewA.JPG"):
-            os.remove(filename+"_crossviewA.JPG")
-        if os.path.isfile(filename+"_crossviewB.JPG"):
-            os.remove(filename+"_crossviewB.JPG")
-        if os.path.isfile(filename+"_wiggle.GIF"):
-            os.remove(filename+"_wiggle.GIF")
+        if os.path.isfile(filename+"_anaglyph.JPG"):
+            os.remove(filename+"_anaglyph.JPG")
+        if os.path.isfile(filename+"_crossview.JPG"):
+            os.remove(filename+"_crossview.JPG")
+        if os.path.isfile(filename+"_parallelview.JPG"):
+            os.remove(filename+"_parallelview.JPG")
+        if os.path.isfile(filename+"_wigglegrams.GIF"):
+            os.remove(filename+"_wigglegrams.GIF")

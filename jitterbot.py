@@ -5,6 +5,31 @@ import jitterqueue
 import matplotlib.pyplot as plt
 import urllib2
 
+def process_data(subreddit, uid):
+    if subreddit == 'anaglyph':
+        filename = uid+"_anaglyph.JPG"
+    elif subreddit == 'crossview':
+        filename = uid+"_crossview.JPG"
+    elif subreddit == 'parallelview':
+        filename = uid+"_parallelview.JPG"
+    elif subreddit == 'wigglegram':
+        filename = uid+"_wiggle.GIF"
+
+    if jq.queue[uid][subreddit]['process']:
+        print 'Submitting to Imgur'.format(subreddit)
+        upload_i = jp.submit_imgur(filename)
+        print 'imgur URL: {0}'.format(upload_i.link)
+        jq.queue[uid][subreddit]['imgur'] = upload_i.link
+
+        print 'Submitting to Reddit'
+        upload_r = jp.submit_reddit(subreddit, jq.queue[uid][subreddit]['imgur'])
+        print 'reddit URL: {0}'.format(upload_r.short_link)
+        jq.queue[uid][subreddit]['reddit'] = upload_r.id
+
+        jp.comment_linking_to_oc(jq.queue[uid][subreddit]['reddit'])
+        jq.queue[uid][subreddit]['process'] = False
+        jq.save_queue()
+
 # Get the user information from the configuration file
 config = SafeConfigParser()
 config.read('config.ini')
@@ -16,6 +41,7 @@ print 'Logging into Reddit'
 jp.login_reddit(config.get('reddit', 'username'),
                 config.get('reddit', 'password'),
                 config.get('reddit', 'user_agent'))
+
 print 'Logging into imgur'
 jp.login_imgur(config.get('imgur', 'client_id'),
                config.get('imgur', 'client_secret'))
@@ -23,43 +49,43 @@ jp.login_imgur(config.get('imgur', 'client_id'),
 jq.r_username = config.get('reddit', 'username')
 print 'Loading queue'
 jq.load_queue()
+
 print 'Updating queue for wigglegrams'
 jq.parse_subreddit(jp.r, 'wigglegrams')
 jq.save_queue()
+
 print 'Updating queue for crossview'
 jq.parse_subreddit(jp.r, 'crossview')
 jq.save_queue()
 
 for uid in jq.queue:
-    if ((jq.queue[uid]['anaglyph']==1) or
-        (jq.queue[uid]['crossview']==1) or
-        (jq.queue[uid]['wigglegram']==1)):
-            
-        print '\nDownloading {0} from {1}'.format(uid, jq.queue[uid]['sub'])
+    source_sub = [sub for sub in jq.queue[uid] if jq.queue[uid][sub]['source'] == True][0]
+    if True in [jq.queue[uid][sub]['process'] for sub in jq.queue[uid]]:
+        print '\nDownloading {0} from {1}'.format(uid, source_sub)
         jp.reddit_get_submission(uid)
         ji = jitterimg.jitterimg()
         try:
-            if (jq.queue[uid]['sub'] == 'wigglegrams'):
+            if (source_sub == 'wigglegrams'):
                 ji.download_wigglegram(jp.oc.url)
-            elif (jq.queue[uid]['sub'] == 'crossview'):
+            elif (source_sub == 'crossview'):
                 ji.download_crossview(jp.oc.url)
             print 'Processing images'
         except urllib2.HTTPError, e:
             if e.code == 403:
                 print 'ERROR: Image download lead to 403 forbidden, removing from queue'
-                jq.skip_queue(uid, jq.queue[uid]['sub'])
+                jq.skip_queue(uid)
                 jq.save_queue()
                 continue
             elif e.code == 404:
                 print 'ERROR: Image download lead to 404 not found, removing from queue'
-                jq.skip_queue(uid, jq.queue[uid]['sub'])
+                jq.skip_queue(uid)
                 jq.save_queue()
                 continue
             else:
                 raise
         except ji.FiletypeUnknown, filetype:
             print 'ERROR: Filetype unknown or incompatible: {0}'.format(filetype)
-            jq.skip_queue(uid, jq.queue[uid]['sub'])
+            jq.skip_queue(uid)
             jq.save_queue()
             continue
         ji.save_all(uid)
@@ -78,7 +104,7 @@ for uid in jq.queue:
         if inputVar.upper() == 'N':
             inputVar = raw_input("Add to skip list? (Y/N) ")
             if inputVar.upper() == 'Y':
-                jq.skip_queue(uid, jq.queue[uid]['sub'])
+                jq.skip_queue(uid)
                 jq.save_queue()
             ji.remove_all(uid)
             continue
@@ -91,66 +117,29 @@ for uid in jq.queue:
             ji.swap_lr()
             print 'Re-processing images'
             ji.save_all(uid)
-            
-        if (jq.queue[uid]['anaglyph'] == 1):
-            if not 'anaglyphImgur' in jq.queue[uid]:
-                print 'Submitting anaglyphs to Imgur'
-                upload_i = jp.submit_imgur_2(uid+"_anaglyphA.JPG",
-                                             uid+"_anaglyphB.JPG")
-                print 'imgur URL: {0}'.format(upload_i.link)
-                jq.queue[uid]['anaglyphImgur'] = upload_i.link
-            if not 'anaglyphReddit' in jq.queue[uid]:
-                print 'Submitting anaglyphs to Reddit'
-                upload_r = jp.submit_reddit('Anaglyph', jq.queue[uid]['anaglyphImgur'])
-                print 'reddit URL: {0}'.format(upload_r.short_link)
-                jq.queue[uid]['anaglyphReddit'] = upload_r.id
-            jp.comment_linking_to_oc(jq.queue[uid]['anaglyphReddit'])
-            jq.queue[uid]['anaglyph'] = 0
-            jq.save_queue()
 
-        if (jq.queue[uid]['crossview'] == 1):
-            if not 'crossviewImgur' in jq.queue[uid]:
-                print 'Submitting crossviews to Imgur'
-                upload_i = jp.submit_imgur_2(uid+"_crossviewA.JPG",
-                                             uid+"_crossviewB.JPG")
-                print 'imgur URL: {0}'.format(upload_i.link)
-                jq.queue[uid]['crossviewImgur'] = upload_i.link
-            if not 'crossviewReddit' in jq.queue[uid]:
-                print 'Submitting crossviews to Reddit'
-                upload_r = jp.submit_reddit('CrossView', jq.queue[uid]['crossviewImgur'])
-                print 'reddit URL: {0}'.format(upload_r.short_link)
-                jq.queue[uid]['crossviewReddit'] = upload_r.id
-            jp.comment_linking_to_oc(jq.queue[uid]['crossviewReddit'])
-            jq.queue[uid]['crossview'] = 0
-            jq.save_queue()
-
-        if (jq.queue[uid]['wigglegram'] == 1):
-            if not 'wigglegramImgur' in jq.queue[uid]:
-                print 'Submitting wigglegram to Imgur'
-                upload_i = jp.submit_imgur(uid+"_wiggle.GIF")
-                print 'imgur URL: {0}'.format(upload_i.link)
-                jq.queue[uid]['wigglegramImgur'] = upload_i.link
-            if not 'wigglegramReddit' in jq.queue[uid]:
-                print 'Submitting wigglegram to Reddit'
-                upload_r = jp.submit_reddit('Wigglegrams', jq.queue[uid]['wigglegramImgur'])
-                print 'reddit URL: {0}'.format(upload_r.short_link)
-                jq.queue[uid]['wigglegramReddit'] = upload_r.id
-            jp.comment_linking_to_oc(jq.queue[uid]['wigglegramReddit'])
-            jq.queue[uid]['wigglegram'] = 0
-            jq.save_queue()
-                
-        if ((jq.queue[uid]['sub'] == 'wigglegrams') and
-            ('anaglyphReddit' in jq.queue[uid]) and
-            ('crossviewReddit' in jq.queue[uid])):
-            jp.comment_oc(jq.queue[uid]['anaglyphReddit'],
-                          jq.queue[uid]['crossviewReddit'])
-            print 'Great Success!'
-        elif ((jq.queue[uid]['sub'] == 'crossview') and
-              ('anaglyphReddit' in jq.queue[uid]) and
-              ('wigglegramReddit' in jq.queue[uid])):
-            jp.comment_oc(jq.queue[uid]['anaglyphReddit'],
-                          jq.queue[uid]['wigglegramReddit'])
-            print 'Great Success!'
+        process_data('anaglyph', uid)
+        process_data('crossview', uid)
+        process_data('parallelview', uid)
+        process_data('wigglegrams', uid)
+        
+        if (source_sub == 'anaglyph'):
+            jp.comment_oc(jq.queue[uid]['crossview']['reddit'],
+                          jq.queue[uid]['parallelview']['reddit'],
+                          jq.queue[uid]['wigglegrams']['reddit'])
+        elif (source_sub == 'crossview'):
+            jp.comment_oc(jq.queue[uid]['anaglyph']['reddit'],
+                          jq.queue[uid]['parallelview']['reddit'],
+                          jq.queue[uid]['wigglegrams']['reddit'])
+        elif (source_sub == 'parallelview'):
+            jp.comment_oc(jq.queue[uid]['anaglyph']['reddit'],
+                          jq.queue[uid]['crossview']['reddit'],
+                          jq.queue[uid]['wigglegrams']['reddit'])
+        elif (source_sub == 'wigglegrams'):
+            jp.comment_oc(jq.queue[uid]['anaglyph']['reddit'],
+                          jq.queue[uid]['crossview']['reddit'],
+                          jq.queue[uid]['parallelview']['reddit'])
+        print 'Great Success!'
                 
         ji.remove_all(uid)
 

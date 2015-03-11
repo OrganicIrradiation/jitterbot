@@ -20,10 +20,10 @@ class jitterpost(object):
     def reddit_get_submission(self, submission_id):
         self.oc = self.r.get_submission(submission_id=submission_id)
         if hasattr(self.oc.author, 'name'):
-            self.title = self.oc.title + ' (from /r/'+self.oc.subreddit.display_name+ ' by /u/' + self.oc.author.name + ')'
-            self.title_short = self.oc.title + ' (/u/' + self.oc.author.name + ')'
+            self.title = '{0} from /r/{1} by /u/{2}'.format(self.oc.title, self.oc.subreddit.display_name, self.oc.author.name)
+            self.title_short = '{0} by /u/{1}'.format(self.oc.title, self.oc.author.name)
         else:
-            self.title = self.oc.title + ' (from /r/'+self.oc.subreddit.display_name + ')'
+            self.title = '{0} from /r/{1}'.format(self.oc.title, self.oc.subreddit.display_name)
             self.title_short = self.oc.title
         self.title = self.remove_oc(self.title)
         self.title_short = self.remove_oc(self.title_short)
@@ -32,12 +32,6 @@ class jitterpost(object):
     def submit_imgur(self, filename):
         imgur_image = self.i.upload_image(filename, title=self.title)
         return imgur_image
-
-    def submit_imgur_2(self, filenameA, filenameB):
-        uploaded_imageA = self.i.upload_image(filenameA, title='Version A', description=self.title)
-        uploaded_imageB = self.i.upload_image(filenameB, title='Version B', description=self.title)
-        imgur_album = self.i.create_album(images=[uploaded_imageA, uploaded_imageB])
-        return imgur_album
         
     def submit_reddit(self, subreddit, url):
         submission = self.r.submit(subreddit, self.title_short, url=url)
@@ -46,19 +40,20 @@ class jitterpost(object):
     def comment_linking_to_oc(self, new_id):
         newSubmission = self.r.get_submission(submission_id=new_id)
         msg = ''
-        msg += 'These images were automatically generated from a submission by /u/' + self.oc.author.name + ' in /r/' + self.oc.subreddit.display_name + '. '
-        msg += 'Please note that there are two (2) versions in the album, one with the correct depth and the other with inverse depth, depending on how your view the images. '
+        msg += 'These images were automatically generated from a submission by /u/{0} in /r/{1}. '.format(self.oc.author.name, self.oc.subreddit.display_name)
         msg += 'You can find the original post here:\n\n'
-        msg += '* [' + self.escape_reddit(self.oc.title) + '](' + self.oc.permalink + ')\n'
+        msg += '* [{0}]({1})'.format(self.escape_reddit(self.oc.title), self.oc.permalink)
         newSubmission.add_comment(msg)
         
-    def comment_oc(self, submissionAID, submissionBID):
+    def comment_oc(self, submissionAID, submissionBID, submissionCID):
         submissionA = self.r.get_submission(submission_id=submissionAID)
         submissionB = self.r.get_submission(submission_id=submissionBID)
+        submissionC = self.r.get_submission(submission_id=submissionCID)
         msg = ''
-        msg += 'I automatically converted your image for /r/'+submissionA.subreddit.display_name+' and /r/'+submissionB.subreddit.display_name+'!\n\n'
-        msg += '* ['+submissionA.subreddit.display_name+'](' + submissionA.permalink + ')\n'
-        msg += '* ['+submissionB.subreddit.display_name+'](' + submissionB.permalink + ')'
+        msg += 'I automatically converted your image for /r/{0}, /r/{1}, and /r/{2}!\n\n'.format(submissionA.subreddit.display_name, submissionB.subreddit.display_name, submissionC.subreddit.display_name)
+        msg += '* [{0}]({1})\n'.format(submissionA.subreddit.display_name,submissionA.permalink)
+        msg += '* [{0}]({1})\n'.format(submissionB.subreddit.display_name,submissionB.permalink)
+        msg += '* [{0}]({1})'.format(submissionC.subreddit.display_name,submissionC.permalink)
         self.oc.add_comment(msg)
         self.oc.upvote()
         
@@ -71,6 +66,7 @@ class jitterpost(object):
         outText = outText.replace(u'{oc}', u'')
         outText = outText.replace(u'OC', u'')
         outText = outText.replace(u'oc', u'')
+        outText = outText.replace(u'  ', u' ')
         return outText
 
     def escape_reddit(self, txt):
