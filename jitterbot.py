@@ -59,8 +59,8 @@ jq.parse_subreddit(jp.r, 'crossview')
 jq.save_queue()
 
 for uid in jq.queue:
-    source_sub = [sub for sub in jq.queue[uid] if jq.queue[uid][sub]['source'] == True][0]
-    if True in [jq.queue[uid][sub]['process'] for sub in jq.queue[uid]]:
+    if (True in [jq.queue[uid][sub]['process'] for sub in jq.queue[uid]]):
+        source_sub = [sub for sub in jq.queue[uid] if jq.queue[uid][sub]['source'] == True][0]
         print '\nDownloading {0} from {1}'.format(uid, source_sub)
         jp.reddit_get_submission(uid)
         ji = jitterimg.jitterimg()
