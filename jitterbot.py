@@ -12,8 +12,8 @@ def process_data(subreddit, uid):
         filename = uid+"_crossview.JPG"
     elif subreddit == 'parallelview':
         filename = uid+"_parallelview.JPG"
-    elif subreddit == 'wigglegram':
-        filename = uid+"_wiggle.GIF"
+    elif subreddit == 'wigglegrams':
+        filename = uid+"_wigglegrams.GIF"
 
     if jq.queue[uid][subreddit]['process']:
         print 'Submitting to Imgur'.format(subreddit)
